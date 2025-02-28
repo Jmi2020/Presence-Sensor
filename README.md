@@ -1,182 +1,106 @@
-# Occupant Presence Detection System
 
-A comprehensive system for detecting occupant presence in "shift pods" using mmWave sensors and BLE scanning, with integration to Home Assistant for automated climate control.
+# 🚀 Occupant Presence Detection System
 
-## System Overview
+Enhance comfort, automate efficiency, and optimize climate control with the ultimate **Occupant Presence Detection System** designed specifically for "shift pods"! Combining cutting-edge mmWave technology with Bluetooth Low Energy (BLE) scanning, this smart system integrates seamlessly with Home Assistant to bring your environment to life.
 
-This project creates an occupancy detection system for multiple "shift pods" that integrates with Home Assistant for climate control automation. The system consists of:
+---
 
-1. **ESP32C3 Nodes**: One per shift pod, equipped with:
-   - MR24HPC1 24 GHz mmWave sensor for fine motion detection
-   - BLE scanning to detect occupant-specific bracelets/devices
+## 🌟 Why This System?
+- **Precision Occupancy Detection:** Leverages advanced MR24HPC1 mmWave sensors for accurate, real-time detection of even subtle occupant movements.
+- **Smart Identification:** Uses BLE scanning to precisely identify specific occupants through wearable bracelets or devices.
+- **Automated Climate Control:** Integrates effortlessly with Home Assistant and Matter-compatible Midea AC units, adjusting climate settings automatically based on presence.
 
-2. **Backend Server**: Node.js/TypeScript application that:
-   - Collects occupancy data from the pods
-   - Stores historical occupancy logs
-   - Provides a REST API for the frontend
-   - Pushes real-time updates via WebSockets
-   - Integrates with Home Assistant via MQTT
+---
 
-3. **Frontend Dashboard**: React application that:
-   - Displays the status of all pods
-   - Shows detailed occupancy logs
-   - Allows pod configuration
-   - Updates in real-time
+## 🛠️ Technology Stack
 
-4. **Home Assistant Integration**: 
-   - Receives occupancy data as binary sensors
-   - Controls a Midea AC unit via Matter integration
-   - Runs automations based on occupancy patterns
+- **ESP32C3 Nodes:** Real-time occupancy detection powered by mmWave and BLE sensors.
+- **Backend:** Node.js/TypeScript server managing occupancy data, real-time updates via WebSockets, and MQTT integration.
+- **Frontend Dashboard:** Interactive React dashboard showing real-time pod status, occupancy logs, and configurations.
+- **Home Assistant Integration:** Automations triggered via MQTT and Matter to maintain optimal climate conditions.
 
-## Project Structure
+---
+
+## 📂 Project Structure
 
 ```
-├── esp32_firmware/         # ESP32C3 firmware for the pods
-│   ├── platformio.ini      # PlatformIO configuration
-│   └── src/                # Source code for ESP32
-│       └── main.cpp        # Main firmware file
-├── backend/                # Node.js/TypeScript backend
-│   ├── src/                # Source code
-│   │   ├── config/         # Configuration
-│   │   ├── models/         # Database models
-│   │   ├── routes/         # API routes
-│   │   └── services/       # Business logic services
-│   ├── package.json        # Dependencies
-│   └── tsconfig.json       # TypeScript configuration
-├── frontend/               # React frontend
-│   ├── public/             # Static files
-│   └── src/                # Source code
-│       ├── components/     # React components
-│       ├── contexts/       # React contexts
-│       ├── pages/          # Page components
-│       ├── services/       # API services
-│       └── types/          # TypeScript interfaces
-└── home_assistant_integration/  # Home Assistant configuration
-    └── config/             # Configuration files
+.
+├── esp32_firmware/            # ESP32C3 sensor firmware
+├── backend/                   # Node.js/TypeScript server
+├── frontend/                  # Interactive React UI
+└── home_assistant_integration/# Home Assistant configs
 ```
 
-## Setup Instructions
+---
 
-### Prerequisites
+## 🚦 Quick Start
 
-- Two Raspberry Pi 5 devices (16 GB RAM recommended):
-  - One for the backend server and frontend
-  - One for Home Assistant OS
-- ESP32C3 boards (Seeed XIAO ESP32C3) for each pod
-- MR24HPC1 mmWave sensors for each pod
-- BLE bracelets or devices for occupants
-- MQTT broker (can be installed on either Raspberry Pi)
-- PostgreSQL database
-- Midea AC unit with Matter support
+### Hardware Checklist
+- Raspberry Pi 5 (two recommended)
+- ESP32C3 boards (Seeed XIAO recommended)
+- MR24HPC1 mmWave sensors
+- BLE bracelets or devices
+- MQTT Broker
+- PostgreSQL Database
+- Matter-compatible Midea AC
 
 ### ESP32 Setup
 
-1. Install PlatformIO
-2. Update WiFi and MQTT credentials in `esp32_firmware/src/main.cpp`
-3. Update known BLE MAC addresses for occupants
-4. Build and flash to your ESP32C3 boards
-5. Connect the mmWave sensor to GPIO4 (RX) and GPIO5 (TX)
+```bash
+# Install PlatformIO, configure credentials & BLE MAC addresses
+# Flash firmware
+cd esp32_firmware
+platformio run --target upload
+```
 
-### Backend Setup
+### Backend Server
 
-1. Install Node.js and PostgreSQL
-2. Create a PostgreSQL database named `presence_sensor`
-3. Navigate to the backend directory and install dependencies:
-   ```bash
-   cd backend
-   npm install
-   ```
-4. Update the `.env` file with your configuration
-5. Build and start the server:
-   ```bash
-   npm run build
-   npm start
-   ```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory and install dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
-2. Update any environment variables in `.env` if needed
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-
-### Home Assistant Setup
-
-1. Install Home Assistant OS on your second Raspberry Pi 5
-2. Set up the MQTT integration
-3. Copy the configuration files from `home_assistant_integration/config/` to your Home Assistant configuration directory
-4. Set up a Matter integration for your Midea AC unit
-5. Restart Home Assistant
-
-## Usage
-
-### ESP32 Nodes
-
-- Each ESP32 node continuously scans for mmWave presence and BLE signals
-- When both mmWave motion and a known BLE device are detected, the pod is considered occupied
-- The occupancy status is published via MQTT
-
-### Backend
-
-- Receives occupancy updates from ESP32 nodes
-- Stores current status and historical logs
-- Provides REST API endpoints
-- Establishes WebSocket connections for real-time updates
-- Forwards occupancy data to Home Assistant via MQTT
+```bash
+cd backend
+npm install
+npm run build
+npm start
+```
 
 ### Frontend Dashboard
 
-- Displays all pods with their current status
-- Shows detailed view of a selected pod
-- Displays historical log data
-- Updates in real-time via WebSockets
-
-### Home Assistant Automations
-
-- Turns on the AC when a pod becomes occupied
-- Turns off the AC when all pods are unoccupied for 15 minutes
-- Adjusts temperature based on how many pods are occupied
-
-## Maintenance and Troubleshooting
-
-### ESP32 Nodes
-
-- Check the serial monitor for debugging information
-- Verify that the mmWave sensor is correctly wired
-- Ensure the BLE scanning is detecting the correct MAC addresses
-- Adjust the RSSI threshold if occupants are being detected from adjacent pods
-
-### Backend
-
-- Check the logs for any errors
-- Verify database connection
-- Ensure the MQTT broker is running and accessible
-
-### Frontend
-
-- Check the browser console for errors
-- Verify the API endpoints are accessible
+```bash
+cd frontend
+npm install
+npm start # for development
+npm run build # for production
+```
 
 ### Home Assistant
 
-- Check that the MQTT integration is working
-- Verify that the binary sensors are being created
-- Test the automations manually to ensure they work as expected
+- Set up MQTT integration
+- Copy configuration files from `home_assistant_integration/config/`
+- Configure Matter integration for your AC
 
-## License
+---
 
+## 📈 Features & Usage
+
+- **Real-Time Monitoring:** Instantly view occupancy statuses via the interactive dashboard.
+- **Historical Logs:** Keep track of occupancy patterns for smarter management.
+- **Automated Efficiency:** Home Assistant adjusts your climate based on occupancy.
+
+---
+
+## 🛠️ Troubleshooting & Support
+- **ESP32 Nodes:** Monitor via serial logs, adjust BLE RSSI thresholds if necessary.
+- **Backend:** Check server logs and MQTT connectivity.
+- **Frontend:** Browser console debugging.
+- **Home Assistant:** Validate automations manually and ensure MQTT integrity.
+
+---
+
+## 📃 License
 MIT
 
-## Authors
-
+## 👨‍💻 Created By
 Jmi3030
+
+---
+
+✨ Enjoy smarter, automated living with precision occupancy detection! ✨
