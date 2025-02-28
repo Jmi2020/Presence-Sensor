@@ -1,0 +1,38 @@
+# Home Assistant Configuration for Pod Occupancy Integration
+
+# Core Configuration
+homeassistant:
+  name: Home
+  latitude: !secret latitude
+  longitude: !secret longitude
+  elevation: !secret elevation
+  unit_system: metric
+  time_zone: !secret time_zone
+
+# MQTT Integration
+mqtt:
+  broker: !secret mqtt_broker_host
+  port: !secret mqtt_broker_port
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  discovery: true
+  discovery_prefix: homeassistant
+
+# Adding our Pod occupancy sensors
+# These will be automatically discovered via MQTT discovery
+
+# Customize entities
+customize:
+  binary_sensor.pod_pod1_occupancy:
+    friendly_name: "Pod 1 Occupancy"
+    icon: mdi:human-greeting-variant
+  binary_sensor.pod_pod2_occupancy:
+    friendly_name: "Pod 2 Occupancy"
+    icon: mdi:human-greeting-variant
+  # Add more pods as needed
+
+# Matter Integration for Midea AC
+matter:
+
+# Automations for controlling the AC based on pod occupancy
+automation: !include automations.yaml

@@ -1,0 +1,16 @@
+# System-level requirements
+
+# Python dependencies (if needed for any scripts)
+# This section intentionally left empty - add if needed
+
+# Other system dependencies needed:
+# - Node.js 18.x or higher
+# - PostgreSQL 14.x or higher
+# - PlatformIO (for ESP32 firmware)
+# - Home Assistant
+
+# Note: Individual component dependencies are managed by:
+# - Backend: package.json (npm)
+# - Frontend: package.json (npm)
+# - ESP32: platformio.ini
+# - Home Assistant: configuration.yaml

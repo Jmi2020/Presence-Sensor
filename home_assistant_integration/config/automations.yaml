@@ -1,0 +1,101 @@
+# Home Assistant automations for occupancy-based climate control
+
+# Turn on AC when a pod becomes occupied
+- id: 'turn_on_ac_when_occupied'
+  alias: 'Turn On AC When Pod Occupied'
+  description: 'Turns on the Midea AC when any pod becomes occupied'
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.pod_pod1_occupancy
+        - binary_sensor.pod_pod2_occupancy
+      from: 'off'
+      to: 'on'
+  condition:
+    # Only run if the AC is currently off
+    - condition: state
+      entity_id: climate.midea_ac
+      state: 'off'
+  action:
+    - service: climate.turn_on
+      target:
+        entity_id: climate.midea_ac
+    - service: climate.set_hvac_mode
+      target:
+        entity_id: climate.midea_ac
+      data:
+        hvac_mode: cool
+    - service: climate.set_temperature
+      target:
+        entity_id: climate.midea_ac
+      data:
+        temperature: 23
+    - service: notify.mobile_app_phone
+      data:
+        message: 'AC turned on due to pod occupancy'
+        title: 'Climate Control'
+
+# Turn off AC when all pods are unoccupied for 15 minutes
+- id: 'turn_off_ac_when_unoccupied'
+  alias: 'Turn Off AC When All Pods Unoccupied'
+  description: 'Turns off the Midea AC when all pods have been unoccupied for 15 minutes'
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.pod_pod1_occupancy
+        - binary_sensor.pod_pod2_occupancy
+      to: 'off'
+      for:
+        minutes: 15
+  condition:
+    # Only run if all pods are unoccupied
+    - condition: state
+      entity_id: binary_sensor.pod_pod1_occupancy
+      state: 'off'
+    - condition: state
+      entity_id: binary_sensor.pod_pod2_occupancy
+      state: 'off'
+    # Only run if the AC is currently on
+    - condition: state
+      entity_id: climate.midea_ac
+      state: 'on'
+  action:
+    - service: climate.turn_off
+      target:
+        entity_id: climate.midea_ac
+    - service: notify.mobile_app_phone
+      data:
+        message: 'AC turned off - all pods unoccupied for 15 minutes'
+        title: 'Climate Control'
+
+# Adjust temperature based on occupancy pattern
+- id: 'adjust_temperature_based_on_occupancy'
+  alias: 'Adjust Temperature Based on Occupancy'
+  description: 'Adjusts AC temperature based on how many pods are occupied'
+  trigger:
+    - platform: state
+      entity_id:
+        - binary_sensor.pod_pod1_occupancy
+        - binary_sensor.pod_pod2_occupancy
+  condition:
+    - condition: state
+      entity_id: climate.midea_ac
+      state: 'on'
+  action:
+    - service: climate.set_temperature
+      target:
+        entity_id: climate.midea_ac
+      data:
+        temperature: >
+          {% set occupied_count = 0 %}
+          {% if is_state('binary_sensor.pod_pod1_occupancy', 'on') %}
+            {% set occupied_count = occupied_count + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.pod_pod2_occupancy', 'on') %}
+            {% set occupied_count = occupied_count + 1 %}
+          {% endif %}
+          {% if occupied_count > 1 %}
+            {{ 22 }}
+          {% else %}
+            {{ 23 }}
+          {% endif %}
