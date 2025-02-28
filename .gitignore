@@ -14,6 +14,10 @@ coverage/
 .env.local
 .env.*.local
 
+# Config files with sensitive information
+esp32_firmware/src/config.h
+backend/.env
+
 # OS files
 .DS_Store
 .DS_Store?

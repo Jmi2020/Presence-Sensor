@@ -1,4 +1,3 @@
-
 # 🚀 Occupant Presence Detection System
 
 Enhance comfort, automate efficiency, and optimize climate control with the ultimate **Occupant Presence Detection System** designed specifically for "shift pods"! Combining cutting-edge mmWave technology with Bluetooth Low Energy (BLE) scanning, this smart system integrates seamlessly with Home Assistant to bring your environment to life.
@@ -84,6 +83,50 @@ npm run build # for production
 - **Real-Time Monitoring:** Instantly view occupancy statuses via the interactive dashboard.
 - **Historical Logs:** Keep track of occupancy patterns for smarter management.
 - **Automated Efficiency:** Home Assistant adjusts your climate based on occupancy.
+
+---
+
+## Configuration
+
+This repository contains template configuration files that need to be filled with your personal settings.
+
+### ESP32 Firmware Configuration
+
+1. Copy `esp32_firmware/src/config-sample.h` to `esp32_firmware/src/config.h`
+2. Edit `config.h` with your:
+   - WiFi credentials
+   - MQTT server details
+   - Your device MAC addresses for BLE tracking
+
+Example:
+```cpp
+// WiFi settings
+#define WIFI_SSID "MyHomeNetwork"
+#define WIFI_PASSWORD "my-secure-password"
+
+// MQTT settings
+#define MQTT_SERVER "192.168.1.100"
+#define MQTT_PORT 1883
+#define MQTT_USERNAME "mqtt_user"
+#define MQTT_PASSWORD "mqtt_password"
+
+// Known occupant BLE MAC addresses
+#define KNOWN_OCCUPANTS { \
+  {"AA:BB:CC:DD:EE:FF", "person1"}, \
+  {"11:22:33:44:55:66", "person2"} \
+}
+```
+
+### Backend Configuration
+
+1. Copy `backend/.env.sample` to `backend/.env`
+2. Fill in your database credentials, MQTT broker details, and other settings
+
+## Security Notice
+
+- **NEVER commit your actual configuration files with passwords or personal identifiers**
+- All sensitive configuration files are excluded in .gitignore
+- Double-check what you're committing with `git diff --cached` before pushing
 
 ---
 
