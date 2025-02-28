@@ -5,17 +5,7 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 #include <ArduinoJson.h>
-
-// WiFi settings
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-
-// MQTT settings
-const char* mqtt_server = "YOUR_MQTT_SERVER_IP"; // IP of your Home Assistant or backend server
-const int mqtt_port = 1883;
-const char* mqtt_username = "YOUR_MQTT_USERNAME";
-const char* mqtt_password = "YOUR_MQTT_PASSWORD";
-const char* mqtt_topic_presence = "presence/pod/"; // Will append podId
+#include "config.h" // Include the config file with sensitive information
 
 // Pod identification
 String podId = "pod1"; // Unique ID for this pod
@@ -32,11 +22,7 @@ BLEScan* pBLEScan;
 BLEClient* pClient;
 
 // Known occupant BLE MAC addresses
-std::map<std::string, std::string> knownOccupants = {
-  {"11:22:33:44:55:66", "occupant1"},
-  {"aa:bb:cc:dd:ee:ff", "occupant2"},
-  {"BC:57:29:13:F2:93", "wristband1"}  // Added your wristband MAC address
-};
+std::map<std::string, std::string> knownOccupants = KNOWN_OCCUPANTS;
 
 // State variables
 bool mmwaveDetected = false;
@@ -76,7 +62,7 @@ void setup() {
   Serial.println("Occupant Presence Detection System - Pod: " + podId);
   
   setupWifi();
-  mqttClient.setServer(mqtt_server, mqtt_port);
+  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
   
   setupBLE();
   
@@ -122,7 +108,7 @@ void setupWifi() {
   Serial.println("Connecting to WiFi");
   
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -140,7 +126,7 @@ void reconnectMQTT() {
     Serial.println("Connecting to MQTT broker...");
     String clientId = "ESP32Client-" + podId;
     
-    if (mqttClient.connect(clientId.c_str(), mqtt_username, mqtt_password)) {
+    if (mqttClient.connect(clientId.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
       Serial.println("Connected to MQTT broker");
     } else {
       Serial.print("MQTT connection failed, rc=");
