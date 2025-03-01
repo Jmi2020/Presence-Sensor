@@ -45,12 +45,23 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 
 ### ESP32 Setup
 
+#### Option 1: PlatformIO (Arduino Framework)
 ```bash
 # Install PlatformIO, configure credentials & BLE MAC addresses
 # Flash firmware
 cd esp32_firmware
 platformio run --target upload
 ```
+
+#### Option 2: ESPHome (recommended for mmWave sensor)
+```bash
+# For the mmWave sensor with ESPHome
+cd esp32_firmware
+# Edit example-config.yaml with your WiFi credentials and BLE MAC addresses
+esphome run example-config.yaml
+```
+
+> **Important:** The `esp32_firmware/example-config.yaml` file contains the configuration necessary for properly setting up the MR24HPC1 mmWave sensor with ESPHome. It includes all the necessary sensor configurations, composite occupancy detection, and BLE tracking settings. Make sure to modify the WiFi credentials and BLE MAC addresses before flashing.
 
 ### Backend Server
 
@@ -92,6 +103,7 @@ This repository contains template configuration files that need to be filled wit
 
 ### ESP32 Firmware Configuration
 
+#### Arduino Framework Configuration
 1. Copy `esp32_firmware/src/config-sample.h` to `esp32_firmware/src/config.h`
 2. Edit `config.h` with your:
    - WiFi credentials
@@ -116,6 +128,18 @@ Example:
   {"11:22:33:44:55:66", "person2"} \
 }
 ```
+
+#### ESPHome Configuration (for mmWave sensor)
+1. Edit `esp32_firmware/example-config.yaml` with your:
+   - WiFi credentials
+   - BLE device MAC addresses
+   - Any specific sensor thresholds
+
+The example-config.yaml already contains the proper settings for:
+- mmWave presence detection
+- BLE RSSI tracking
+- Composite occupancy sensing logic
+- All sensor connections and GPIO pins
 
 ### Backend Configuration
 
