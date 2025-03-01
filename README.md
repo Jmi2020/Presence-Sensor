@@ -144,6 +144,9 @@ MIT
 ## 👨‍💻 Created By
 Jmi3030
 
+## 🙏 Acknowledgements
+- [Seeed Studio MR24HPC1 ESPHome External Components](https://github.com/limengdu/MR24HPC1_ESPHome_external_components) - For the mmWave sensor integration with ESPHome
+
 ---
 
 ✨ Enjoy smarter, automated living with precision occupancy detection! ✨

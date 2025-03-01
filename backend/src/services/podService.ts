@@ -49,17 +49,25 @@ export const createOrUpdatePod = async (data: PodUpdateData): Promise<Pod> => {
       await pod.save();
     }
 
-    // Create occupant log
-    await OccupantLog.create({
-      podId: pod.id,
-      podExternalId: pod.podId,
-      occupantId: data.lastOccupantId,
-      mmwaveDetected: data.lastMmwaveDetection,
-      bleDetected: data.lastBleDetection,
-      rssi: data.lastRssi,
-      isOccupied: data.isOccupied,
-      timestamp: data.lastUpdated
-    });
+    // Make sure we have valid IDs before creating the log
+    if (pod && pod.id) {
+      try {
+        // Create occupant log
+        await OccupantLog.create({
+          podId: pod.id,
+          podExternalId: data.podId, // Use the external ID directly from input data
+          occupantId: data.lastOccupantId,
+          mmwaveDetected: data.lastMmwaveDetection,
+          bleDetected: data.lastBleDetection,
+          rssi: data.lastRssi,
+          isOccupied: data.isOccupied,
+          timestamp: data.lastUpdated
+        });
+      } catch (logError) {
+        console.error('Error creating occupancy log, but pod was updated:', logError);
+        // Continue without failing the whole operation - we at least updated the pod
+      }
+    }
 
     return pod;
   } catch (error) {

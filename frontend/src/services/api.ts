@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Pod, OccupantLog, PodUpdateData } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+// Use Vite's environment variable system
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Create axios instance
 const api = axios.create({

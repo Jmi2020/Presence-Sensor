@@ -8,17 +8,47 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Divider
+  Divider,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { Refresh as RefreshIcon } from '@mui/icons-material';
 import PodCard from '../components/PodCard';
 import PodLogs from '../components/PodLogs';
 import PodEditForm from '../components/PodEditForm';
+import SensorReadings from '../components/SensorReadings';
 import { usePodContext } from '../contexts/PodContext';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`pod-tabpanel-${index}`}
+      aria-labelledby={`pod-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 const Dashboard: React.FC = () => {
   const { pods, loading, error, selectedPod, podLogs, logsLoading, refreshPods, selectPod } = usePodContext();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
   
   const handlePodClick = (podId: string) => {
     selectPod(podId);
@@ -38,6 +68,10 @@ const Dashboard: React.FC = () => {
   
   const handlePodUpdated = () => {
     refreshPods();
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
   };
 
   return (
@@ -112,7 +146,31 @@ const Dashboard: React.FC = () => {
                   pod={selectedPod} 
                   onEdit={handleEditClick}
                 />
-                <PodLogs logs={podLogs} loading={logsLoading} />
+
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 3 }}>
+                  <Tabs value={tabValue} onChange={handleTabChange} aria-label="pod details tabs">
+                    <Tab label="Activity Logs" id="pod-tab-0" />
+                    <Tab label="Sensor Readings" id="pod-tab-1" />
+                  </Tabs>
+                </Box>
+                
+                <TabPanel value={tabValue} index={0}>
+                  <PodLogs logs={podLogs} loading={logsLoading} />
+                </TabPanel>
+                
+                <TabPanel value={tabValue} index={1}>
+                  <SensorReadings 
+                    loading={logsLoading} 
+                    mmwaveDetected={selectedPod.lastMmwaveDetection}
+                    bleDetected={selectedPod.lastBleDetection}
+                    rssi={selectedPod.lastRssi}
+                    motionEnergy={65} // Example value - would come from actual sensor API
+                    existenceEnergy={78} // Example value - would come from actual sensor API
+                    motionDistance={1.5} // Example value - would come from actual sensor API
+                    motionSpeed={0.3} // Example value - would come from actual sensor API
+                    staticDistance={2.0} // Example value - would come from actual sensor API
+                  />
+                </TabPanel>
               </>
             )}
           </Paper>

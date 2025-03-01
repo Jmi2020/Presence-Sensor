@@ -10,28 +10,50 @@ export const initializeSocket = (onPodUpdate?: (pod: Pod) => void) => {
     socket.close();
   }
 
-  // Initialize socket connection
-  const socketUrl = process.env.REACT_APP_SOCKET_URL || window.location.origin;
-  socket = io(socketUrl);
-
-  // Socket event handlers
-  socket.on('connect', () => {
-    console.log('Connected to WebSocket server');
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Disconnected from WebSocket server');
-  });
-
-  // Handle pod updates if callback provided
-  if (onPodUpdate) {
-    socket.on('podUpdate', (pod: Pod) => {
-      console.log('Pod update received:', pod);
-      onPodUpdate(pod);
+  try {
+    // Initialize socket connection with retry options
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    socket = io(socketUrl, {
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000
     });
-  }
 
-  return socket;
+    // Socket event handlers
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from WebSocket server');
+    });
+
+    socket.on('connect_error', (error) => {
+      console.log('Socket connection error:', error.message);
+    });
+
+    socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`Attempting to reconnect (attempt ${attemptNumber})...`);
+    });
+
+    socket.on('reconnect_failed', () => {
+      console.log('Failed to reconnect to the server after multiple attempts');
+    });
+
+    // Handle pod updates if callback provided
+    if (onPodUpdate) {
+      socket.on('podUpdate', (pod: Pod) => {
+        console.log('Pod update received:', pod);
+        onPodUpdate(pod);
+      });
+    }
+
+    return socket;
+  } catch (err) {
+    console.error('Error initializing socket:', err);
+    return null;
+  }
 };
 
 export const closeSocket = () => {

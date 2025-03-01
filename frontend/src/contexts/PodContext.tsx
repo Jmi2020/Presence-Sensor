@@ -43,8 +43,10 @@ export const PodProvider: React.FC<PodProviderProps> = ({ children }) => {
       const fetchedPods = await getPods();
       setPods(fetchedPods);
     } catch (err) {
-      setError('Failed to fetch pods');
       console.error('Error fetching pods:', err);
+      setError('Failed to connect to the backend server. Please ensure the backend is running on port 3000.');
+      // Set empty pods array to avoid undefined errors
+      setPods([]);
     } finally {
       setLoading(false);
     }
@@ -80,28 +82,33 @@ export const PodProvider: React.FC<PodProviderProps> = ({ children }) => {
 
   // Initialize WebSocket for real-time updates
   useEffect(() => {
-    const handlePodUpdate = (updatedPod: Pod) => {
-      // Update pods list
-      setPods((prevPods: Pod[]) => {
-        const index = prevPods.findIndex((p: Pod) => p.podId === updatedPod.podId);
-        if (index === -1) {
-          return [...prevPods, updatedPod];
-        } else {
-          const newPods = [...prevPods];
-          newPods[index] = updatedPod;
-          return newPods;
+    try {
+      const handlePodUpdate = (updatedPod: Pod) => {
+        // Update pods list
+        setPods((prevPods: Pod[]) => {
+          const index = prevPods.findIndex((p: Pod) => p.podId === updatedPod.podId);
+          if (index === -1) {
+            return [...prevPods, updatedPod];
+          } else {
+            const newPods = [...prevPods];
+            newPods[index] = updatedPod;
+            return newPods;
+          }
+        });
+
+        // Update selected pod if it's the updated one
+        if (selectedPod && selectedPod.podId === updatedPod.podId) {
+          setSelectedPod(updatedPod);
+          // Refresh logs for the selected pod
+          fetchPodLogs(updatedPod.podId);
         }
-      });
+      };
 
-      // Update selected pod if it's the updated one
-      if (selectedPod && selectedPod.podId === updatedPod.podId) {
-        setSelectedPod(updatedPod);
-        // Refresh logs for the selected pod
-        fetchPodLogs(updatedPod.podId);
-      }
-    };
-
-    initializeSocket(handlePodUpdate);
+      initializeSocket(handlePodUpdate);
+    } catch (err) {
+      console.error('Socket initialization error:', err);
+      // Socket errors are non-critical, so we don't need to set the error state
+    }
 
     // Initial data fetch
     refreshPods();

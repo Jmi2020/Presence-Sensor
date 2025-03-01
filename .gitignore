@@ -17,7 +17,7 @@ coverage/
 # Config files with sensitive information
 esp32_firmware/src/config.h
 esp32_firmware/upgraded.yaml
-esp32_firmware/Seeed Studio repo/MR24HPC1_ESPHome_external_components/example/mr24hpc1-integrated.yaml
+esp32_firmware/Seeed Studio repo/
 backend/.env
 
 # OS files
