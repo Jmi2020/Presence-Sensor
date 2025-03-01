@@ -10,6 +10,13 @@ interface PodUpdateData {
   lastBleDetection: boolean;
   lastRssi: number | null;
   lastUpdated: Date;
+  // Add new sensor fields
+  staticDistance?: number;
+  motionDistance?: number;
+  existenceEnergy?: number;
+  motionEnergy?: number;
+  motionSpeed?: number;
+  bodyMovement?: number;
 }
 
 /**
@@ -43,6 +50,14 @@ export const createOrUpdatePod = async (data: PodUpdateData): Promise<Pod> => {
       pod.lastRssi = data.lastRssi;
       pod.lastUpdated = data.lastUpdated;
       
+      // Update sensor fields if provided
+      if (data.staticDistance !== undefined) pod.staticDistance = data.staticDistance;
+      if (data.motionDistance !== undefined) pod.motionDistance = data.motionDistance;
+      if (data.existenceEnergy !== undefined) pod.existenceEnergy = data.existenceEnergy;
+      if (data.motionEnergy !== undefined) pod.motionEnergy = data.motionEnergy;
+      if (data.motionSpeed !== undefined) pod.motionSpeed = data.motionSpeed;
+      if (data.bodyMovement !== undefined) pod.bodyMovement = data.bodyMovement;
+      
       if (data.name) pod.name = data.name;
       if (data.location) pod.location = data.location;
       
@@ -61,6 +76,13 @@ export const createOrUpdatePod = async (data: PodUpdateData): Promise<Pod> => {
           bleDetected: data.lastBleDetection,
           rssi: data.lastRssi,
           isOccupied: data.isOccupied,
+          // Include sensor data in the log
+          staticDistance: data.staticDistance,
+          motionDistance: data.motionDistance,
+          existenceEnergy: data.existenceEnergy,
+          motionEnergy: data.motionEnergy,
+          motionSpeed: data.motionSpeed,
+          bodyMovement: data.bodyMovement,
           timestamp: data.lastUpdated
         });
       } catch (logError) {

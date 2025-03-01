@@ -21,11 +21,12 @@ interface SensorProps {
   mmwaveDetected: boolean;
   bleDetected: boolean;
   rssi: number | null;
-  motionEnergy: number | null;
-  existenceEnergy: number | null;
-  motionDistance: number | null;
-  motionSpeed: number | null;
-  staticDistance: number | null;
+  motionEnergy?: number | null;
+  existenceEnergy?: number | null;
+  motionDistance?: number | null;
+  motionSpeed?: number | null;
+  staticDistance?: number | null;
+  bodyMovement?: number | null;
 }
 
 const SensorReadings: React.FC<SensorProps> = ({
@@ -37,7 +38,8 @@ const SensorReadings: React.FC<SensorProps> = ({
   existenceEnergy = null,
   motionDistance = null,
   motionSpeed = null,
-  staticDistance = null
+  staticDistance = null,
+  bodyMovement = null
 }) => {
   
   if (loading) {
@@ -169,6 +171,17 @@ const SensorReadings: React.FC<SensorProps> = ({
                     fontSize="small" 
                   />
                 </Box>
+              </Grid>
+            )}
+            
+            {bodyMovement !== null && (
+              <Grid item xs={6} md={4}>
+                <Typography variant="body2" color="text.secondary">
+                  Body Movement:
+                </Typography>
+                <Typography variant="h6" fontWeight="bold">
+                  {bodyMovement}
+                </Typography>
               </Grid>
             )}
           </Grid>

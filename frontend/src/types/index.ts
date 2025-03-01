@@ -10,6 +10,13 @@ export interface Pod {
   lastRssi: number | null;
   lastUpdated: string;
   isActive: boolean;
+  // New sensor fields
+  staticDistance?: number;
+  motionDistance?: number;
+  existenceEnergy?: number;
+  motionEnergy?: number;
+  motionSpeed?: number;
+  bodyMovement?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +30,13 @@ export interface OccupantLog {
   bleDetected: boolean;
   rssi: number | null;
   isOccupied: boolean;
+  // New sensor fields
+  staticDistance?: number;
+  motionDistance?: number;
+  existenceEnergy?: number;
+  motionEnergy?: number;
+  motionSpeed?: number;
+  bodyMovement?: number;
   timestamp: string;
   createdAt: string;
   updatedAt: string;

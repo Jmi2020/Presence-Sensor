@@ -12,6 +12,13 @@ interface OccupantLogAttributes {
   bleDetected: boolean;
   rssi: number | null;
   isOccupied: boolean;
+  // New sensor fields
+  staticDistance?: number;
+  motionDistance?: number;
+  existenceEnergy?: number;
+  motionEnergy?: number;
+  motionSpeed?: number;
+  bodyMovement?: number;
   timestamp: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +36,13 @@ class OccupantLog extends Model<OccupantLogAttributes, OccupantLogCreationAttrib
   public bleDetected!: boolean;
   public rssi!: number | null;
   public isOccupied!: boolean;
+  // New sensor fields
+  public staticDistance?: number;
+  public motionDistance?: number;
+  public existenceEnergy?: number;
+  public motionEnergy?: number;
+  public motionSpeed?: number;
+  public bodyMovement?: number;
   public timestamp!: Date;
 
   // Timestamps
@@ -73,6 +87,31 @@ OccupantLog.init({
   isOccupied: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
+  },
+  // New sensor fields
+  staticDistance: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  motionDistance: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  existenceEnergy: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  motionEnergy: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  motionSpeed: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  bodyMovement: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
   },
   timestamp: {
     type: DataTypes.DATE,

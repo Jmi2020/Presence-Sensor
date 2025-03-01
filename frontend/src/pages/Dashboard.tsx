@@ -164,11 +164,12 @@ const Dashboard: React.FC = () => {
                     mmwaveDetected={selectedPod.lastMmwaveDetection}
                     bleDetected={selectedPod.lastBleDetection}
                     rssi={selectedPod.lastRssi}
-                    motionEnergy={65} // Example value - would come from actual sensor API
-                    existenceEnergy={78} // Example value - would come from actual sensor API
-                    motionDistance={1.5} // Example value - would come from actual sensor API
-                    motionSpeed={0.3} // Example value - would come from actual sensor API
-                    staticDistance={2.0} // Example value - would come from actual sensor API
+                    motionEnergy={selectedPod.motionEnergy}
+                    existenceEnergy={selectedPod.existenceEnergy}
+                    motionDistance={selectedPod.motionDistance}
+                    motionSpeed={selectedPod.motionSpeed}
+                    staticDistance={selectedPod.staticDistance}
+                    bodyMovement={selectedPod.bodyMovement}
                   />
                 </TabPanel>
               </>

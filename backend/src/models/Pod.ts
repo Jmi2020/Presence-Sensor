@@ -14,6 +14,13 @@ interface PodAttributes {
   lastRssi: number | null;
   lastUpdated: Date;
   isActive: boolean;
+  // New sensor fields
+  staticDistance?: number;
+  motionDistance?: number;
+  existenceEnergy?: number;
+  motionEnergy?: number;
+  motionSpeed?: number;
+  bodyMovement?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +40,14 @@ class Pod extends Model<PodAttributes, PodCreationAttributes> implements PodAttr
   public lastRssi!: number | null;
   public lastUpdated!: Date;
   public isActive!: boolean;
+  
+  // New sensor fields
+  public staticDistance?: number;
+  public motionDistance?: number;
+  public existenceEnergy?: number;
+  public motionEnergy?: number;
+  public motionSpeed?: number;
+  public bodyMovement?: number;
 
   // Timestamps
   public readonly createdAt!: Date;
@@ -90,6 +105,31 @@ Pod.init({
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true,
+  },
+  // New sensor fields
+  staticDistance: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  motionDistance: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  existenceEnergy: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  motionEnergy: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  motionSpeed: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  bodyMovement: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
   },
   createdAt: {
     type: DataTypes.DATE,

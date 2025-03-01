@@ -9,6 +9,21 @@ dotenv.config();
 
 let io: SocketIOServer | null = null;
 
+interface MmWaveSensorData {
+  pod_id: string;
+  occupied: boolean;
+  occupant_id?: string;
+  mmwave_detected: boolean;
+  ble_detected: boolean;
+  rssi?: number;
+  static_distance?: number;
+  motion_distance?: number;
+  existence_energy?: number;
+  motion_energy?: number;
+  motion_speed?: number;
+  body_movement_parameter?: number;
+}
+
 // MQTT Client configuration
 const mqttConfig = {
   clientId: `backend_${Math.random().toString(16).slice(2, 8)}`,
@@ -40,6 +55,7 @@ export const initMqtt = (socketIo?: SocketIOServer): void => {
     
     // Subscribe to pod presence topics
     const presenceTopic = process.env.MQTT_TOPIC_PRESENCE || 'presence/pod/#';
+    
     // Check if client is available before subscribing
     if (client) {
       client.subscribe(presenceTopic, (err) => {
@@ -73,7 +89,7 @@ const handleMqttMessage = async (topic: string, message: Buffer) => {
     // Check if the topic matches our presence topic pattern
     if (topic.startsWith('presence/pod/')) {
       const podId = topic.split('/').pop();
-      const payload = JSON.parse(message.toString());
+      const payload = JSON.parse(message.toString()) as MmWaveSensorData;
       
       if (!podId || !payload) {
         console.error('Invalid message format or missing podId');
@@ -96,7 +112,14 @@ const handleMqttMessage = async (topic: string, message: Buffer) => {
         lastMmwaveDetection: payload.mmwave_detected || false,
         lastBleDetection: payload.ble_detected || false,
         lastRssi: payload.rssi || null,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
+        // Add new sensor fields
+        staticDistance: payload.static_distance,
+        motionDistance: payload.motion_distance,
+        existenceEnergy: payload.existence_energy,
+        motionEnergy: payload.motion_energy,
+        motionSpeed: payload.motion_speed,
+        bodyMovement: payload.body_movement_parameter
       });
 
       // Emit event to WebSocket clients if io is initialized
