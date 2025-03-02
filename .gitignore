@@ -46,3 +46,11 @@ venv/
 
 # ESPHome
 esp32_firmware/.esphome/
+
+# secrets
+mr24hpc1-integrated.yaml
+
+# Generated configuration files
+mmwave-pod*_*.yaml
+*.yaml.backup
+run_esphome.sh

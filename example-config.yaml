@@ -1,38 +1,59 @@
 substitutions:
-  name: mmwave-pod2
-  friendly_name: mmWave Pod 2
+  name: "mmwave-pod2"  # Shortened name to stay under 24 chars
+  friendly_name: "mmWave Pod 2"
+
 esphome:
-  name: ${name}
-  friendly_name: ${friendly_name}
-  name_add_mac_suffix: false
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: false  # Changed to false to prevent adding more characters
   project:
-    name: seeedstudio.mmwave_kit
-    version: '3.0'
+    name: "seeedstudio.mmwave_kit"
+    version: "3.0"
   platformio_options:
     board_build.flash_mode: dio
     board_build.mcu: esp32c3
+
 esp32:
   board: esp32-c3-devkitm-1
   variant: esp32c3
   framework:
     type: esp-idf
+
+# Use local components first instead of remote
 external_components:
-- source: ../
-  refresh: 0s
+  - source: ../  # Use the local components folder from repository
+    refresh: 0s
+  # Can also use remote if needed:
+  # - source: github://limengdu/mmwave-kit-external-components@main
+  #   refresh: 0s
+
+# Enable logging
 logger:
   hardware_uart: USB_SERIAL_JTAG
   level: DEBUG
-api: null
+
+# Enable Home Assistant API
+api:
+
 ota:
-- platform: esphome
+  - platform: esphome
+
 wifi:
-  ssid: Debdave21
-  password: 2020ETaxidea!
+  # Replace with your actual Wi-Fi credentials
+  ssid: "Debdave21"
+  password: "2020ETaxidea!"
+  
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: mmwave-pod1-ap
-captive_portal: null
+    ssid: "mmwave-pod1-ap"
+
+captive_portal:
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
 esp32_improv:
   authorizer: none
+
 uart:
   id: uart_bus
   baud_rate: 115200
@@ -40,106 +61,128 @@ uart:
   tx_pin: 5
   parity: NONE
   stop_bits: 1
+
 seeed_mr24hpc1:
   id: my_seeed_mr24hpc1
+
 text_sensor:
-- platform: seeed_mr24hpc1
-  heart_beat:
-    name: Heartbeat
-  product_model:
-    name: Product Model
-  product_id:
-    name: Product ID
-  hardware_model:
-    name: Hardware Model
-  hardware_version:
-    name: Hardware Version
-  keep_away:
-    name: Active Reporting Of Proximity
-  motion_status:
-    name: Motion Information
-  custom_mode_end:
-    name: Custom Mode Status
+  - platform: seeed_mr24hpc1
+    heart_beat:
+      name: "Heartbeat"
+    product_model:
+      name: "Product Model"
+    product_id:
+      name: "Product ID"
+    hardware_model:
+      name: "Hardware Model"
+    hardware_version:
+      name: "Hardware Version"
+    keep_away:
+      name: "Active Reporting Of Proximity"
+    motion_status:
+      name: "Motion Information"
+    custom_mode_end:
+      name: "Custom Mode Status"
+
 binary_sensor:
-- platform: seeed_mr24hpc1
-  has_target:
-    name: Presence Information
-    id: mmwave_presence
-- platform: template
-  name: Composite Occupancy
-  id: composite_occupancy
-  lambda: "// We'll say occupant is truly \"present\" if mmWave presence is ON\n//\
-    \ AND either occupant 1 OR occupant 2 BLE RSSI > -70 dBm (adjust threshold as\
-    \ needed)\nif (id(mmwave_presence).state) {\n  // Check if either occupant is\
-    \ detected via BLE\n  bool occupant1_present = id(occupant1_ble_rssi).has_state()\
-    \ && id(occupant1_ble_rssi).state > -70;\n  bool occupant2_present = id(occupant2_ble_rssi).has_state()\
-    \ && id(occupant2_ble_rssi).state > -70;\n  \n  if (occupant1_present || occupant2_present)\
-    \ {\n    return true;\n  }\n}\nreturn false;"
-  filters:
-  - delayed_on: 5s
-  - delayed_off: 5s
+  - platform: seeed_mr24hpc1
+    has_target:
+      name: "Presence Information"
+      id: mmwave_presence  # Adding ID for use in composite sensor
+
+  # Add the composite sensor that combines mmWave and BLE detection
+  - platform: template
+    name: "Composite Occupancy"
+    id: composite_occupancy
+    lambda: |-
+      // We'll say occupant is truly "present" if mmWave presence is ON
+      // AND either occupant 1 OR occupant 2 BLE RSSI > -70 dBm (adjust threshold as needed)
+      if (id(mmwave_presence).state) {
+        // Check if either occupant is detected via BLE
+        bool occupant1_present = id(occupant1_ble_rssi).has_state() && id(occupant1_ble_rssi).state > -70;
+        bool occupant2_present = id(occupant2_ble_rssi).has_state() && id(occupant2_ble_rssi).state > -70;
+        
+        if (occupant1_present || occupant2_present) {
+          return true;
+        }
+      }
+      return false;
+    filters:
+      - delayed_on: 5s
+      - delayed_off: 5s
+
+# Set up BLE tracking 
 esp32_ble_tracker:
   scan_parameters:
     interval: 1000ms
     window: 500ms
-    active: false
+    active: false  # Passive scanning to reduce overhead
+
 sensor:
-- platform: seeed_mr24hpc1
-  custom_presence_of_detection:
-    name: Static Distance
-  movement_signs:
-    name: Body Movement Parameter
-  custom_motion_distance:
-    name: Motion Distance
-  custom_spatial_static_value:
-    name: Existence Energy
-  custom_spatial_motion_value:
-    name: Motion Energy
-  custom_motion_speed:
-    name: Motion Speed
-  custom_mode_num:
-    name: Current Custom Mode
-- platform: ble_rssi
-  mac_address: BC:57:29:13:F2:92
-  name: Occupant 1 BLE RSSI
-  id: occupant1_ble_rssi
-- platform: ble_rssi
-  mac_address: BC:57:29:13:F2:93
-  name: Occupant 2 BLE RSSI
-  id: occupant2_ble_rssi
+  # Original mmWave sensors
+  - platform: seeed_mr24hpc1
+    custom_presence_of_detection:
+      name: "Static Distance"
+    movement_signs:
+      name: "Body Movement Parameter"
+    custom_motion_distance:
+      name: "Motion Distance"
+    custom_spatial_static_value:
+      name: "Existence Energy"
+    custom_spatial_motion_value:
+      name: "Motion Energy"
+    custom_motion_speed:
+      name: "Motion Speed"
+    custom_mode_num:
+      name: "Current Custom Mode"
+      
+  # Add BLE RSSI sensors for both occupants
+  - platform: ble_rssi
+    mac_address: "BC:57:29:13:F2:92"  # First occupant device MAC
+    name: "Occupant 1 BLE RSSI"
+    id: occupant1_ble_rssi
+
+  - platform: ble_rssi
+    mac_address: "BC:57:29:13:F2:93"  # Second occupant device MAC
+    name: "Occupant 2 BLE RSSI"
+    id: occupant2_ble_rssi
+
 switch:
-- platform: seeed_mr24hpc1
-  underlying_open_function:
-    name: Underlying Open Function Info Output Switch
+  - platform: seeed_mr24hpc1
+    underlying_open_function:
+      name: "Underlying Open Function Info Output Switch"
+
 button:
-- platform: seeed_mr24hpc1
-  restart:
-    name: Module Restart
-  custom_set_end:
-    name: End Of Custom Mode Settings
+  - platform: seeed_mr24hpc1
+    restart:
+      name: "Module Restart"
+    custom_set_end:
+      name: "End Of Custom Mode Settings"
+
 select:
-- platform: seeed_mr24hpc1
-  scene_mode:
-    name: Scene
-  unman_time:
-    name: Time For Entering No Person State (Standard Function)
-  existence_boundary:
-    name: Existence Boundary
-  motion_boundary:
-    name: Motion Boundary
+  - platform: seeed_mr24hpc1
+    scene_mode:
+      name: "Scene"
+    unman_time:
+      name: "Time For Entering No Person State (Standard Function)"
+    existence_boundary:
+      name: "Existence Boundary"
+    motion_boundary:
+      name: "Motion Boundary"
+
 number:
-- platform: seeed_mr24hpc1
-  sensitivity:
-    name: Sensitivity
-  custom_mode:
-    name: Custom Mode
-  existence_threshold:
-    name: Existence Energy Threshold
-  motion_threshold:
-    name: Motion Energy Threshold
-  motion_trigger:
-    name: Motion Trigger Time
-  motion_to_rest:
-    name: Motion To Rest Time
-  custom_unman_time:
-    name: Time For Entering No Person State (Underlying Open Function)
+  - platform: seeed_mr24hpc1
+    sensitivity:
+      name: "Sensitivity"
+    custom_mode:
+      name: "Custom Mode"
+    existence_threshold:
+      name: "Existence Energy Threshold"
+    motion_threshold:
+      name: "Motion Energy Threshold"
+    motion_trigger:
+      name: "Motion Trigger Time"
+    motion_to_rest:
+      name: "Motion To Rest Time"
+    custom_unman_time:
+      name: "Time For Entering No Person State (Underlying Open Function)"

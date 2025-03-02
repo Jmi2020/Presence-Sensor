@@ -10,6 +10,7 @@ import subprocess
 import traceback
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
+import datetime
 
 # Add ruamel.yaml import for better YAML handling with comments
 try:
@@ -169,13 +170,20 @@ class ConfigToolApp:
             return {}
             
     def save_config(self):
-        """Save the configuration while preserving comments if possible"""
+        """Save the configuration to the example-config.yaml file while preserving comments if possible"""
+        # This is now only used when initially loading the app or directly saving to the example file
+        
         # Safety check to prevent saving an empty config
         if not self.config_data:
             messagebox.showerror("Error", "Configuration data is empty!")
             return False
             
         try:
+            # Only use this method to update the example-config.yaml file
+            if not self.config_file_path.endswith("example-config.yaml"):
+                # For other files, use save_to_file instead
+                return self.save_to_file(self.config_file_path)
+                
             # Backup the original file
             backup_path = f"{self.config_file_path}.backup"
             if os.path.exists(self.config_file_path):
@@ -432,9 +440,17 @@ class ConfigToolApp:
             if not sensors_updated:
                 messagebox.showwarning("Warning", "Could not find BLE RSSI sensors in the configuration.")
             
-            # Save the updated configuration
-            self.save_config()
-            self.status_var.set("Configuration saved successfully")
+            # Create a timestamp-based filename for the new config
+            timestamp = f"{self.name_var.get()}_{self.get_timestamp()}"
+            new_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{timestamp}.yaml")
+            
+            # Save to the new config file path
+            self.save_to_file(new_config_path)
+            
+            # Update the config file path to use this new file
+            self.config_file_path = new_config_path
+            
+            self.status_var.set(f"Configuration saved to {os.path.basename(new_config_path)}")
             
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save configuration: {e}")
@@ -446,9 +462,20 @@ class ConfigToolApp:
             self.status_var.set("Validating configuration...")
             self.root.update()
             
-            # Save configuration before validation
-            if not self.save_config():
-                return
+            # Check if we're already using a saved configuration file
+            # If not, save a new one for validation
+            if self.config_file_path.endswith("example-config.yaml"):
+                # Create a new configuration file for validation
+                timestamp = f"{self.name_var.get()}_{self.get_timestamp()}"
+                new_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{timestamp}.yaml")
+                
+                # Save to the new file path
+                if not self.save_to_file(new_config_path):
+                    return
+                    
+                # Update the config file path
+                self.config_file_path = new_config_path
+                self.status_var.set(f"Created new configuration file: {os.path.basename(new_config_path)}")
             
             # Run ESPHome validation
             esphome_path = self.get_esphome_path()
@@ -477,7 +504,7 @@ class ConfigToolApp:
             )
             
             if result.returncode == 0:
-                messagebox.showinfo("Validation Successful", "The configuration is valid!")
+                messagebox.showinfo("Validation Successful", f"The configuration ({config_file}) is valid!")
                 self.status_var.set("Configuration validated successfully")
             else:
                 error_msg = result.stderr if result.stderr else result.stdout
@@ -499,12 +526,27 @@ class ConfigToolApp:
     def flash_device(self):
         # Flash the firmware to the device
         try:
-            # Ensure configuration is saved before flashing
-            if not self.save_config():
-                return
+            # Check if we're already using a saved configuration file
+            # If not, save a new one for flashing
+            if self.config_file_path.endswith("example-config.yaml"):
+                # Create a new configuration file for flashing
+                timestamp = f"{self.name_var.get()}_{self.get_timestamp()}"
+                new_config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{timestamp}.yaml")
+                
+                # Save to the new file path
+                if not self.save_to_file(new_config_path):
+                    return
+                    
+                # Update the config file path
+                self.config_file_path = new_config_path
+                self.status_var.set(f"Created new configuration file: {os.path.basename(new_config_path)}")
+            else:
+                # If we're using an existing file, just make sure it's up to date
+                if not self.save_to_file(self.config_file_path):
+                    return
                 
             # Ask user to confirm
-            if not messagebox.askyesno("Confirm", "This will flash the firmware to your ESP32 device. Continue?"):
+            if not messagebox.askyesno("Confirm", f"This will flash the firmware to your ESP32 device using {os.path.basename(self.config_file_path)}. Continue?"):
                 return
             
             # Set status
@@ -562,7 +604,7 @@ class ConfigToolApp:
                 # Linux
                 subprocess.Popen(['x-terminal-emulator', '-e', f'cd "{working_dir}" && {cmd_prefix} run {config_file_path}'])
             
-            self.status_var.set("Flash command started in terminal")
+            self.status_var.set(f"Flashing using {config_file_path}. Command started in terminal.")
             
         except FileNotFoundError as e:
             messagebox.showerror("Error", f"ESPHome CLI not found: {e}\nPlease install ESPHome.")
@@ -573,6 +615,43 @@ class ConfigToolApp:
             print(f"Exception during flash: {e}")
             self.status_var.set(f"Error: {e}")
             traceback.print_exc()  # Print exception details for debugging
+
+    def get_timestamp(self):
+        """Generate a timestamp string for filename"""
+        now = datetime.datetime.now()
+        return now.strftime("%Y%m%d_%H%M%S")
+        
+    def save_to_file(self, file_path):
+        """Save the configuration to the specified file path"""
+        try:
+            # Safety check to prevent saving an empty config
+            if not self.config_data:
+                messagebox.showerror("Error", "Configuration data is empty!")
+                return False
+                
+            # Try to save with comment preservation using ruamel.yaml if available
+            if 'YAML' in globals() and YAML is not None:
+                yaml_handler = YAML()
+                yaml_handler.preserve_quotes = True
+                yaml_handler.indent(mapping=2, sequence=4, offset=2)
+                
+                with open(file_path, 'w') as file:
+                    yaml_handler.dump(self.config_data, file)
+                
+                print(f"Configuration saved to {file_path}")
+                return True
+            else:
+                # Fallback to standard YAML
+                with open(file_path, 'w') as file:
+                    yaml.dump(self.config_data, file, default_flow_style=False, sort_keys=False)
+                
+                print(f"Configuration saved to {file_path} (with standard YAML)")
+                return True
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save configuration to {file_path}: {e}")
+            traceback.print_exc()
+            return False
 
     def fix_all_widget_backgrounds(self):
         """Recursively set background color for all widgets"""
