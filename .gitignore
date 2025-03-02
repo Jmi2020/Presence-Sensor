@@ -49,6 +49,7 @@ esp32_firmware/.esphome/
 
 # secrets
 mr24hpc1-integrated.yaml
+my-config.yaml
 
 # Generated configuration files
 mmwave-pod*_*.yaml
