@@ -25,7 +25,10 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 ├── color_palette.txt          # Color palette reference for the configuration tool
 ├── config_tool.py             # Python GUI tool for configuring and flashing ESP32 devices
 ├── example-config.yaml        # ESPHome configuration template for the mmWave sensor
-├── esp32_firmware/            # ESP32C3 sensor firmware (PlatformIO/Arduino approach)
+├── mmwave-pod*_*.yaml         # Generated device-specific configuration files
+├── mr24hpc1-integrated.yaml   # Integrated configuration for the MR24HPC1 sensor
+├── my-config.yaml             # Your personalized configuration 
+├── run_esphome.sh             # Helper script to run ESPHome commands
 └── home_assistant_integration/# Home Assistant configs
 ```
 
@@ -42,15 +45,7 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 
 ### ESP32 Setup
 
-#### Option 1: PlatformIO (Arduino Framework)
-```bash
-# Install PlatformIO, configure credentials & BLE MAC addresses
-# Flash firmware
-cd esp32_firmware
-platformio run --target upload
-```
-
-#### Option 2: ESPHome with Configuration Tool (recommended for mmWave sensor)
+#### Option 1: ESPHome with Configuration Tool (recommended)
 ```bash
 # Run the configuration tool
 python3 config_tool.py
@@ -60,7 +55,7 @@ The configuration tool provides a simple interface to:
 - Set BLE MAC addresses for occupant tracking
 - Validate and flash your ESP32 device directly
 
-#### Option 3: ESPHome CLI
+#### Option 2: ESPHome CLI
 ```bash
 # For the mmWave sensor with ESPHome CLI
 # Edit example-config.yaml with your WiFi credentials and BLE MAC addresses
@@ -88,35 +83,7 @@ esphome run example-config.yaml
 
 This repository contains template configuration files that need to be filled with your personal settings.
 
-### ESP32 Firmware Configuration
-
-#### Arduino Framework Configuration
-1. Copy `esp32_firmware/src/config-sample.h` to `esp32_firmware/src/config.h`
-2. Edit `config.h` with your:
-   - WiFi credentials
-   - MQTT server details
-   - Your device MAC addresses for BLE tracking
-
-Example:
-```cpp
-// WiFi settings
-#define WIFI_SSID "MyHomeNetwork"
-#define WIFI_PASSWORD "my-secure-password"
-
-// MQTT settings
-#define MQTT_SERVER "192.168.1.100"
-#define MQTT_PORT 1883
-#define MQTT_USERNAME "mqtt_user"
-#define MQTT_PASSWORD "mqtt_password"
-
-// Known occupant BLE MAC addresses
-#define KNOWN_OCCUPANTS { \
-  {"AA:BB:CC:DD:EE:FF", "person1"}, \
-  {"11:22:33:44:55:66", "person2"} \
-}
-```
-
-#### ESPHome Configuration (for mmWave sensor)
+### ESPHome Configuration (for mmWave sensor)
 1. Edit `example-config.yaml` with your:
    - WiFi credentials
    - BLE device MAC addresses

@@ -1,18 +1,19 @@
-
-
 # Environment files
 .env
 .env.local
 .env.*.local
 
 # IDE specific files
-
 .vscode/
+.DS_Store
 
-# venv
+# Python virtual environment
 venv/
 
-# secrets
+# ESPHome build files and cache
+.esphome/
+
+# Configuration secrets
 mr24hpc1-integrated.yaml
 my-config.yaml
 
