@@ -25,9 +25,7 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 ├── color_palette.txt          # Color palette reference for the configuration tool
 ├── config_tool.py             # Python GUI tool for configuring and flashing ESP32 devices
 ├── example-config.yaml        # ESPHome configuration template for the mmWave sensor
-├── mmwave-pod*_*.yaml         # Generated device-specific configuration files
-├── mr24hpc1-integrated.yaml   # Integrated configuration for the MR24HPC1 sensor
-├── my-config.yaml             # Your personalized configuration 
+├── mmwave-pod*_*.yaml         # Script Generated device-specific configuration files
 ├── run_esphome.sh             # Helper script to run ESPHome commands
 └── home_assistant_integration/# Home Assistant configs
 ```
