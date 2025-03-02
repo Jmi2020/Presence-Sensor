@@ -11,6 +11,21 @@ import traceback
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
+# Add ruamel.yaml import for better YAML handling with comments
+try:
+    from ruamel.yaml import YAML
+except ImportError:
+    # If ruamel.yaml is not available, we'll try to install it
+    print("ruamel.yaml not found, trying to install it...")
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "ruamel.yaml"])
+        from ruamel.yaml import YAML
+        print("ruamel.yaml installed successfully!")
+    except Exception as e:
+        print(f"Failed to install ruamel.yaml: {e}")
+        print("Comments in YAML files will not be preserved.")
+        YAML = None
+
 class ConfigToolApp:
     def __init__(self, root):
         self.root = root
@@ -23,6 +38,7 @@ class ConfigToolApp:
         # Initialize variables
         self.config_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "example-config.yaml")
         self.config_data = self.load_config()
+        self.original_yaml_content = self.load_original_yaml()
         
         # Create UI elements
         self.setup_ui()
@@ -136,6 +152,14 @@ class ConfigToolApp:
         self.root.option_add('*Entry.background', self.entry_bg)
         self.root.option_add('*Entry.foreground', self.fg_color)
         
+    def load_original_yaml(self):
+        """Load the original YAML file content to preserve comments and formatting"""
+        try:
+            with open(self.config_file_path, 'r') as f:
+                return f.read()
+        except Exception:
+            return ""
+            
     def load_config(self):
         try:
             with open(self.config_file_path, 'r') as file:
@@ -145,6 +169,7 @@ class ConfigToolApp:
             return {}
             
     def save_config(self):
+        """Save the configuration while preserving comments if possible"""
         # Safety check to prevent saving an empty config
         if not self.config_data:
             messagebox.showerror("Error", "Configuration data is empty!")
@@ -157,16 +182,73 @@ class ConfigToolApp:
                 with open(self.config_file_path, 'r') as src, open(backup_path, 'w') as dst:
                     dst.write(src.read())
             
-            # Save the modified configuration
+            # Try to save with comment preservation using ruamel.yaml if available
+            if 'YAML' in globals() and YAML is not None:
+                yaml_handler = YAML()
+                yaml_handler.preserve_quotes = True
+                yaml_handler.indent(mapping=2, sequence=4, offset=2)
+                
+                # Parse the original YAML
+                if self.original_yaml_content:
+                    # Try to update the parsed YAML with our modified values
+                    try:
+                        from io import StringIO
+                        original_yaml = yaml_handler.load(self.original_yaml_content)
+                        
+                        # Update the parsed YAML with our modified data
+                        self.update_yaml_preserving_structure(original_yaml, self.config_data)
+                        
+                        # Write back to the file
+                        with open(self.config_file_path, 'w') as file:
+                            yaml_handler.dump(original_yaml, file)
+                        
+                        print("Configuration saved with comment preservation")
+                        messagebox.showinfo("Success", "Configuration saved successfully with comments preserved!")
+                        return True
+                    except Exception as e:
+                        print(f"Failed to save with comment preservation: {e}")
+                        traceback.print_exc()
+                        
+            # Fallback to standard YAML if ruamel.yaml failed
+            print("Falling back to standard YAML dump (comments will be lost)")
             with open(self.config_file_path, 'w') as file:
                 yaml.dump(self.config_data, file, default_flow_style=False, sort_keys=False)
             
-            messagebox.showinfo("Success", "Configuration saved successfully!")
+            messagebox.showinfo("Success", "Configuration saved successfully (comments not preserved)!")
             return True
+            
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save configuration: {e}")
+            traceback.print_exc()
             return False
             
+    def update_yaml_preserving_structure(self, original, new_data):
+        """Update the parsed YAML structure with our modified values"""
+        # Update substitutions
+        if 'substitutions' in original and 'substitutions' in new_data:
+            for key in new_data['substitutions']:
+                if key in original['substitutions']:
+                    original['substitutions'][key] = new_data['substitutions'][key]
+        
+        # Update WiFi settings
+        if 'wifi' in original and 'wifi' in new_data:
+            if 'ssid' in original['wifi']:
+                original['wifi']['ssid'] = new_data['wifi']['ssid']
+            if 'password' in original['wifi']:
+                original['wifi']['password'] = new_data['wifi']['password']
+                
+        # Update BLE RSSI MAC addresses
+        if 'sensor' in original and 'sensor' in new_data:
+            for i, orig_sensor in enumerate(original['sensor']):
+                if orig_sensor.get('platform') == 'ble_rssi':
+                    # Find matching sensor in new data
+                    for new_sensor in new_data['sensor']:
+                        if (new_sensor.get('platform') == 'ble_rssi' and 
+                            new_sensor.get('name') == orig_sensor.get('name')):
+                            # Update MAC address
+                            orig_sensor['mac_address'] = new_sensor['mac_address']
+                            break
+
     def setup_ui(self):
         # Create main frame with padding
         main_frame = ttk.Frame(self.root, padding="20", style='TFrame')

@@ -14,8 +14,6 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 ## 🛠️ Technology Stack
 
 - **ESP32C3 Nodes:** Real-time occupancy detection powered by mmWave and BLE sensors.
-- **Backend:** Node.js/TypeScript server managing occupancy data, real-time updates via WebSockets, and MQTT integration.
-- **Frontend Dashboard:** Interactive React dashboard showing real-time pod status, occupancy logs, and configurations.
 - **Home Assistant Integration:** Automations triggered via MQTT and Matter to maintain optimal climate conditions.
 
 ---
@@ -24,9 +22,10 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 
 ```
 .
-├── esp32_firmware/            # ESP32C3 sensor firmware
-├── backend/                   # Node.js/TypeScript server
-├── frontend/                  # Interactive React UI
+├── color_palette.txt          # Color palette reference for the configuration tool
+├── config_tool.py             # Python GUI tool for configuring and flashing ESP32 devices
+├── example-config.yaml        # ESPHome configuration template for the mmWave sensor
+├── esp32_firmware/            # ESP32C3 sensor firmware (PlatformIO/Arduino approach)
 └── home_assistant_integration/# Home Assistant configs
 ```
 
@@ -35,12 +34,10 @@ Enhance comfort, automate efficiency, and optimize climate control with the ulti
 ## 🚦 Quick Start
 
 ### Hardware Checklist
-- Raspberry Pi 5 (two recommended)
 - ESP32C3 boards (Seeed XIAO recommended)
 - MR24HPC1 mmWave sensors
 - BLE bracelets or devices
 - MQTT Broker
-- PostgreSQL Database
 - Matter-compatible Midea AC
 
 ### ESP32 Setup
@@ -53,33 +50,24 @@ cd esp32_firmware
 platformio run --target upload
 ```
 
-#### Option 2: ESPHome (recommended for mmWave sensor)
+#### Option 2: ESPHome with Configuration Tool (recommended for mmWave sensor)
 ```bash
-# For the mmWave sensor with ESPHome
-cd esp32_firmware
+# Run the configuration tool
+python3 config_tool.py
+```
+The configuration tool provides a simple interface to:
+- Configure WiFi settings
+- Set BLE MAC addresses for occupant tracking
+- Validate and flash your ESP32 device directly
+
+#### Option 3: ESPHome CLI
+```bash
+# For the mmWave sensor with ESPHome CLI
 # Edit example-config.yaml with your WiFi credentials and BLE MAC addresses
 esphome run example-config.yaml
 ```
 
-> **Important:** The `esp32_firmware/example-config.yaml` file contains the configuration necessary for properly setting up the MR24HPC1 mmWave sensor with ESPHome. It includes all the necessary sensor configurations, composite occupancy detection, and BLE tracking settings. Make sure to modify the WiFi credentials and BLE MAC addresses before flashing.
-
-### Backend Server
-
-```bash
-cd backend
-npm install
-npm run build
-npm start
-```
-
-### Frontend Dashboard
-
-```bash
-cd frontend
-npm install
-npm start # for development
-npm run build # for production
-```
+> **Important:** The `example-config.yaml` file contains the configuration necessary for properly setting up the MR24HPC1 mmWave sensor with ESPHome. It includes all the necessary sensor configurations, composite occupancy detection, and BLE tracking settings. Make sure to modify the WiFi credentials and BLE MAC addresses before flashing.
 
 ### Home Assistant
 
@@ -91,8 +79,7 @@ npm run build # for production
 
 ## 📈 Features & Usage
 
-- **Real-Time Monitoring:** Instantly view occupancy statuses via the interactive dashboard.
-- **Historical Logs:** Keep track of occupancy patterns for smarter management.
+- **Real-Time Monitoring:** Instantly view occupancy statuses via Home Assistant.
 - **Automated Efficiency:** Home Assistant adjusts your climate based on occupancy.
 
 ---
@@ -130,7 +117,7 @@ Example:
 ```
 
 #### ESPHome Configuration (for mmWave sensor)
-1. Edit `esp32_firmware/example-config.yaml` with your:
+1. Edit `example-config.yaml` with your:
    - WiFi credentials
    - BLE device MAC addresses
    - Any specific sensor thresholds
@@ -140,11 +127,6 @@ The example-config.yaml already contains the proper settings for:
 - BLE RSSI tracking
 - Composite occupancy sensing logic
 - All sensor connections and GPIO pins
-
-### Backend Configuration
-
-1. Copy `backend/.env.sample` to `backend/.env`
-2. Fill in your database credentials, MQTT broker details, and other settings
 
 ## Security Notice
 
@@ -156,8 +138,6 @@ The example-config.yaml already contains the proper settings for:
 
 ## 🛠️ Troubleshooting & Support
 - **ESP32 Nodes:** Monitor via serial logs, adjust BLE RSSI thresholds if necessary.
-- **Backend:** Check server logs and MQTT connectivity.
-- **Frontend:** Browser console debugging.
 - **Home Assistant:** Validate automations manually and ensure MQTT integrity.
 
 ---
