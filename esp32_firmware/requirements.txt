@@ -1,0 +1,13 @@
+# Core dependencies
+PyYAML>=6.0.1        # For YAML configuration file handling
+esphome>=2023.12.5   # For ESP32 firmware management and deployment
+
+# Optional but recommended for development
+black>=23.12.1       # Code formatting
+pylint>=3.0.3        # Code linting
+mypy>=1.8.0          # Type checking
+
+# Note: Some system-level dependencies may also be required:
+# - Python 3.8 or newer
+# - Platform-specific USB drivers for ESP32 communication
+# These cannot be installed via pip and must be installed separately
